@@ -16,8 +16,7 @@ size_t trie::output_matches(string const& pattern, OutIter&& out) const
 
   size_t cur_prefix_len {};
   bfs.emplace(string{},this);
-  for (auto g : pattern){
-    auto curchar = g;
+  for (auto curchar : pattern){
     while (!bfs.empty() && bfs.front().first.size() == cur_prefix_len)
     {
       auto node = bfs.front();
@@ -27,22 +26,23 @@ size_t trie::output_matches(string const& pattern, OutIter&& out) const
         auto childEnd = children.end ();
         if (curchar !='?')
         {
-          if (child!=childEnd){
+          if (child != childEnd){
             bfs.emplace(node.first + curchar, child->second);
           }
         }
         else if (curchar == '?')
         {
-          for (auto d = node.second; d != nullptr; ++d)
+          for (auto& child : node.second->children)
           {
-            bfs.emplace (node.first + child->first, child->second);
+            bfs.emplace (node.first + child.first, child.second);
           }
         }
       }
-      ++cur_prefix_len;
       bfs.pop();
     }
+    ++cur_prefix_len;
   }
+
 
   while (!bfs.empty()){
     auto node = bfs.front ();
@@ -62,7 +62,6 @@ size_t trie::output_matches(string const& pattern, OutIter&& out) const
     }
     bfs.pop ();
   }
-
   return retval;
 }
 
